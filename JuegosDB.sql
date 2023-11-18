@@ -59,7 +59,7 @@ Go
 --procedimientos almacenados
 --Usuarios 
 CREATE PROCEDURE VerUsuarios
-@id
+@id int
 AS
 BEGIN
     SELECT * FROM Usuario
@@ -105,7 +105,7 @@ GO
 
 --Compañia
 CREATE PROCEDURE VerCompañia
-@id
+@id int
 AS
 BEGIN
     SELECT * FROM Compañia
@@ -114,7 +114,7 @@ END
 GO
 
 CREATE PROCEDURE AgegarCompañia
-    @Nombre NVARCHAR(100),
+    @Nombre NVARCHAR(100)
 AS
 BEGIN
     INSERT INTO Compañia (Nombre)
@@ -134,17 +134,17 @@ END
 GO
 
 CREATE PROCEDURE EliminarCompañia
-    @UsuarioID INT
+    @id INT
 AS
 BEGIN
     DELETE FROM Compañia
-    WHERE ID = @UsuarioID;
+    WHERE ID = @id;
 END;
 GO
 
 --Plataforma
 CREATE PROCEDURE VerPlataforma
-@id
+@id int
 AS
 BEGIN
     SELECT * FROM Plataforma
@@ -153,7 +153,7 @@ END
 GO
 
 CREATE PROCEDURE AgregarPlataforma
-    @Nombre NVARCHAR(100),
+    @Nombre NVARCHAR(100)
 AS
 BEGIN
     INSERT INTO Plataforma (Nombre)
@@ -172,9 +172,18 @@ WHERE ID = @ID
 END
 GO
 
+CREATE PROCEDURE EliminarPlataforma
+    @id INT
+AS
+BEGIN
+    DELETE FROM Plataforma
+    WHERE ID = @id;
+END;
+GO
+
 --juego
 CREATE PROCEDURE VerJuego
-@id
+@id int
 AS
 BEGIN
     SELECT * FROM Juego
@@ -190,7 +199,7 @@ CREATE PROCEDURE AgregarJuego
 AS
 BEGIN
     INSERT INTO Juego(Nombre, Descripcion, FechaLanzamiento, CompañiaID)
-    VALUES (@Nombre, @Descripcion, @FechaLanzamiento, CompañiaID);
+    VALUES (@Nombre, @Descripcion, @FechaLanzamiento, @CompañiaID);
 END
 GO
 
@@ -206,7 +215,7 @@ BEGIN
     SET Nombre = @Nombre,
         Descripcion = @Descripcion,
         FechaLanzamiento = @FechaLanzamiento,
-        CompaniaID = @CompaniaID
+        CompañiaID = @CompaniaID
     WHERE ID = @JuegoID;
 END;
 GO
@@ -222,7 +231,7 @@ GO
 
 --personaje
 CREATE PROCEDURE VerPersonaje
-@id
+@id int
 AS
 BEGIN
     SELECT * FROM Personaje
@@ -233,16 +242,17 @@ GO
 CREATE PROCEDURE AgregarPersonaje
     @Nombre NVARCHAR(100),
     @Descripcion NVARCHAR(MAX),
-    @JuegoID INT,
+    @JuegoID INT
 AS
 BEGIN
-    INSERT INTO Juego(Nombre, Descripcion, JuegoId)
-    VALUES (@Nombre, @Descripcion, @JuegoId);
+    INSERT INTO Personaje(Nombre, Descripcion, JuegoID)
+    VALUES (@Nombre, @Descripcion, @JuegoID);
 END
 GO
 
 CREATE PROCEDURE ActualizarPersonaje
     @PersonajeID INT,
+	@Nombre VARCHAR(100),
     @Descripcion NVARCHAR(MAX),
     @JuegoID INT
 AS
@@ -252,6 +262,15 @@ BEGIN
         Descripcion = @Descripcion,
         JuegoID = @JuegoID
     WHERE ID = @PersonajeID;
+END;
+GO
+
+CREATE PROCEDURE EliminarPersonaje
+    @id INT
+AS
+BEGIN
+    DELETE FROM Personaje
+    WHERE ID = @id;
 END;
 GO
 
@@ -411,3 +430,4 @@ INSERT INTO BitacoraJuegos(Host, Transaccion, Usuario, Fecha_Mod, Tabla)
 VALUES (@@SERVERNAME, SUSER_NAME(),'Delete', GETDATE(), 'Personaje')
 END
 GO
+
