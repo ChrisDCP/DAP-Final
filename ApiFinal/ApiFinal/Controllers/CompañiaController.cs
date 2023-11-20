@@ -9,52 +9,54 @@ namespace ApiFinal.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class UsuarioControler : ControllerBase
+    public class CompañiaController : ControllerBase
     {
         public readonly JuegosDbContext _dbcontext;
 
-        public UsuarioControler(JuegosDbContext dbcontext)
+        public CompañiaController(JuegosDbContext dbcontext)
         {
             _dbcontext = dbcontext;
         }
 
         [HttpGet]
         [Route("Lista")]
-        public IActionResult Lista() { 
-            List<Usuario> lista = new List<Usuario>();
+        public IActionResult Lista()
+        {
+            List<Compañia> lista = new List<Compañia>();
 
             try
             {
-                lista = _dbcontext.Usuarios.ToList();
+                lista = _dbcontext.Compañias.ToList();
 
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = lista });
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = lista });
             }
-        
+
         }
 
         [HttpGet]
         [Route("Obtener/{id:int}")]
         public IActionResult Obtner(int id)
         {
-            Usuario oUsuario = _dbcontext.Usuarios.Find(id);
+            Compañia oCompañia = _dbcontext.Compañias.Find(id);
 
-            if (oUsuario == null)
+            if (oCompañia == null)
             {
                 return BadRequest("Producto no encontrado");
             }
 
             try
             {
-                oUsuario = _dbcontext.Usuarios.Where(p => p.Id == id).FirstOrDefault();
+                oCompañia = _dbcontext.Compañias.Where(p => p.Id == id).FirstOrDefault();
                 //25 para incluir otra tabla
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response =oUsuario });
+                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = oCompañia });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = oUsuario });
+                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = oCompañia});
             }
 
         }
@@ -62,40 +64,40 @@ namespace ApiFinal.Controllers
         [HttpPost]
         [Route("Guardar")]
 
-        public IActionResult Guardar([FromBody] Usuario objeto) {
+        public IActionResult Guardar([FromBody] Compañia objeto)
+        {
 
             try
             {
-                _dbcontext.Usuarios.Add(objeto);
+                _dbcontext.Compañias.Add(objeto);
                 _dbcontext.SaveChanges();
 
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message});
+                return StatusCode(StatusCodes.Status200OK, new { ex.Message });
             }
         }
 
         [HttpPut]
         [Route("Editar")]
 
-        public IActionResult Editar([FromBody] Usuario objeto)
+        public IActionResult Editar([FromBody] Compañia objeto)
         {
 
-            Usuario oUsuario = _dbcontext.Usuarios.Find(objeto.Id);
+            Compañia oCompañia = _dbcontext.Compañias.Find(objeto.Id);
 
-            if (oUsuario == null)
+            if (oCompañia == null)
             {
                 return BadRequest("Producto no encontrado");
             }
 
             try
             {
-                oUsuario.NombreUsuario = objeto.NombreUsuario is null ? oUsuario.NombreUsuario : objeto.NombreUsuario;
-                oUsuario.CorreoElectronico = objeto.CorreoElectronico is null ? oUsuario.CorreoElectronico : objeto.CorreoElectronico;
-                oUsuario.Contraseña = objeto.Contraseña is null ? oUsuario.Contraseña : objeto.Contraseña;
-
-                _dbcontext.Usuarios.Update(oUsuario);
+                oCompañia.Nombre = objeto.Nombre is null ? oCompañia.Nombre : objeto.Nombre;
+  
+                _dbcontext.Compañias.Update(oCompañia);
                 _dbcontext.SaveChanges();
 
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
@@ -110,22 +112,23 @@ namespace ApiFinal.Controllers
         [Route("Eliminar/{id:int}")]
         public IActionResult Eliminar(int id)
         {
-            Usuario oUsuario = _dbcontext.Usuarios.Find(id);
+            Compañia oCompañia = _dbcontext.Compañias.Find(id);
 
-            if (oUsuario == null)
+            if (oCompañia == null)
             {
                 return BadRequest("Producto no encontrado");
             }
 
             try
             {
-                _dbcontext.Usuarios.Remove(oUsuario);
+                _dbcontext.Compañias.Remove(oCompañia);
                 _dbcontext.SaveChanges();
 
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status200OK, new {mesaje = ex.Message });
+                return StatusCode(StatusCodes.Status200OK, new { mesaje = ex.Message });
             }
 
         }

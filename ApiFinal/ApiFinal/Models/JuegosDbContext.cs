@@ -17,7 +17,7 @@ public partial class JuegosDbContext : DbContext
 
     public virtual DbSet<BitacoraJuego> BitacoraJuegos { get; set; }
 
-    public virtual DbSet<Compañia> Compañia { get; set; }
+    public virtual DbSet<Compañia> Compañias { get; set; }
 
     public virtual DbSet<Juego> Juegos { get; set; }
 

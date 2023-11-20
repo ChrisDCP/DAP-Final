@@ -6,96 +6,96 @@ using ApiFinal.Models;
 
 namespace ApiFinal.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
-    public class UsuarioControler : ControllerBase
+    public class PlataformaController : ControllerBase
     {
         public readonly JuegosDbContext _dbcontext;
 
-        public UsuarioControler(JuegosDbContext dbcontext)
+        public PlataformaController(JuegosDbContext dbcontext)
         {
             _dbcontext = dbcontext;
         }
 
         [HttpGet]
         [Route("Lista")]
-        public IActionResult Lista() { 
-            List<Usuario> lista = new List<Usuario>();
+        public IActionResult Lista()
+        {
+            List<Plataforma> lista = new List<Plataforma>();
 
             try
             {
-                lista = _dbcontext.Usuarios.ToList();
+                lista = _dbcontext.Plataformas.ToList();
 
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = lista });
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = lista });
             }
-        
+
         }
 
         [HttpGet]
         [Route("Obtener/{id:int}")]
         public IActionResult Obtner(int id)
         {
-            Usuario oUsuario = _dbcontext.Usuarios.Find(id);
+            Plataforma oPlataforma = _dbcontext.Plataformas.Find(id);
 
-            if (oUsuario == null)
+            if (oPlataforma == null)
             {
                 return BadRequest("Producto no encontrado");
             }
 
             try
             {
-                oUsuario = _dbcontext.Usuarios.Where(p => p.Id == id).FirstOrDefault();
+                oPlataforma = _dbcontext.Plataformas.Where(p => p.Id == id).FirstOrDefault();
                 //25 para incluir otra tabla
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response =oUsuario });
+                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = oPlataforma });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = oUsuario });
+                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = oPlataforma });
             }
 
         }
 
         [HttpPost]
         [Route("Guardar")]
-
-        public IActionResult Guardar([FromBody] Usuario objeto) {
+        public IActionResult Guardar([FromBody] Plataforma objeto)
+        {
 
             try
             {
-                _dbcontext.Usuarios.Add(objeto);
+                _dbcontext.Plataformas.Add(objeto);
                 _dbcontext.SaveChanges();
 
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message});
+                return StatusCode(StatusCodes.Status200OK, new { ex.Message });
             }
         }
 
         [HttpPut]
         [Route("Editar")]
 
-        public IActionResult Editar([FromBody] Usuario objeto)
+        public IActionResult Editar([FromBody] Plataforma objeto)
         {
 
-            Usuario oUsuario = _dbcontext.Usuarios.Find(objeto.Id);
+            Plataforma oPlataforma = _dbcontext.Plataformas.Find(objeto.Id);
 
-            if (oUsuario == null)
+            if (oPlataforma == null)
             {
                 return BadRequest("Producto no encontrado");
             }
 
             try
             {
-                oUsuario.NombreUsuario = objeto.NombreUsuario is null ? oUsuario.NombreUsuario : objeto.NombreUsuario;
-                oUsuario.CorreoElectronico = objeto.CorreoElectronico is null ? oUsuario.CorreoElectronico : objeto.CorreoElectronico;
-                oUsuario.Contraseña = objeto.Contraseña is null ? oUsuario.Contraseña : objeto.Contraseña;
+                oPlataforma.Nombre = objeto.Nombre is null ? oPlataforma.Nombre : objeto.Nombre;
 
-                _dbcontext.Usuarios.Update(oUsuario);
+                _dbcontext.Plataformas.Update(oPlataforma);
                 _dbcontext.SaveChanges();
 
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
@@ -110,22 +110,23 @@ namespace ApiFinal.Controllers
         [Route("Eliminar/{id:int}")]
         public IActionResult Eliminar(int id)
         {
-            Usuario oUsuario = _dbcontext.Usuarios.Find(id);
+            Plataforma oPlataforma = _dbcontext.Plataformas.Find(id);
 
-            if (oUsuario == null)
+            if (oPlataforma == null)
             {
                 return BadRequest("Producto no encontrado");
             }
 
             try
             {
-                _dbcontext.Usuarios.Remove(oUsuario);
+                _dbcontext.Plataformas.Remove(oPlataforma);
                 _dbcontext.SaveChanges();
 
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status200OK, new {mesaje = ex.Message });
+                return StatusCode(StatusCodes.Status200OK, new { mesaje = ex.Message });
             }
 
         }

@@ -18,7 +18,7 @@ builder.Services.AddControllers().AddJsonOptions(opt =>
     opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
 
-var misReglasCors = "ReglasCors";
+/*var misReglasCors = "ReglasCors";
 builder.Services.AddCors(opt =>
 {
     opt.AddPolicy(name: misReglasCors, builder =>
@@ -26,7 +26,7 @@ builder.Services.AddCors(opt =>
         builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
 
-});
+});*/
 
 var app = builder.Build();
 
@@ -37,7 +37,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(misReglasCors);
+//app.UseCors(misReglasCors);
 
 app.UseAuthorization();
 
