@@ -86,7 +86,7 @@ public partial class JuegosDbContext : DbContext
             entity.Property(e => e.FechaLanzamiento).HasColumnType("date");
             entity.Property(e => e.Nombre).HasMaxLength(100);
 
-            entity.HasOne(d => d.Compañia).WithMany(p => p.Juegos)
+            entity.HasOne(d => d.compañia).WithMany(p => p.Juegos)
                 .HasForeignKey(d => d.CompañiaId)
                 .HasConstraintName("FK__Juego__CompañiaI__3D5E1FD2");
         });

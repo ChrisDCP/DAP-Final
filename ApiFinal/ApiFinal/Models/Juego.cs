@@ -15,7 +15,7 @@ public partial class Juego
 
     public int? CompañiaId { get; set; }
 
-    public virtual Compañia? Compañia { get; set; }
+    public virtual Compañia? compañia { get; set; }
 
     public virtual ICollection<Personaje> Personajes { get; set; } = new List<Personaje>();
 }

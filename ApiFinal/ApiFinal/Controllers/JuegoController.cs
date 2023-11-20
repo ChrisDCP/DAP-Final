@@ -49,7 +49,7 @@ namespace ApiFinal.Controllers
 
             try
             {
-                oJuego = _dbcontext.Juegos.Where(p => p.Id == id).FirstOrDefault();
+                oJuego = _dbcontext.Juegos.Include(d=> d.compañia).Where(p => p.Id == id).FirstOrDefault();
                 //25 para incluir otra tabla
                 return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = oJuego });
             }
