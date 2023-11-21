@@ -11,12 +11,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<JuegosDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("MyDb")));
+/*builder.Services.AddDbContext<JuegosDbContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("MyDb")));
 
 builder.Services.AddControllers().AddJsonOptions(opt =>
 {
     opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-});
+});*/
 
 /*var misReglasCors = "ReglasCors";
 builder.Services.AddCors(opt =>

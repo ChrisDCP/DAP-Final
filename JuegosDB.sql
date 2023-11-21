@@ -58,6 +58,17 @@ Go
 
 --procedimientos almacenados
 --Usuarios 
+
+CREATE PROCEDURE VerUsuariosSinId
+AS
+BEGIN
+    SELECT * FROM Usuario
+END
+GO
+
+VerUsuariosSinId
+go
+
 CREATE PROCEDURE VerUsuarios
 @id int
 AS
@@ -104,6 +115,16 @@ GO
 
 
 --Compañia
+
+CREATE PROCEDURE VerCompañiaSinId
+AS
+BEGIN
+    SELECT * FROM Compañia
+
+END
+GO
+
+
 CREATE PROCEDURE VerCompañia
 @id int
 AS
@@ -112,6 +133,7 @@ BEGIN
 	WHERE ID = @id
 END
 GO
+
 
 CREATE PROCEDURE AgegarCompañia
     @Nombre NVARCHAR(100)
@@ -143,6 +165,13 @@ END;
 GO
 
 --Plataforma
+CREATE PROCEDURE VerPlataformaSinId
+AS
+BEGIN
+    SELECT * FROM Plataforma
+END
+GO
+
 CREATE PROCEDURE VerPlataforma
 @id int
 AS
@@ -182,6 +211,14 @@ END;
 GO
 
 --juego
+
+CREATE PROCEDURE VerJuegoSinID
+AS
+BEGIN
+    SELECT * FROM Juego
+END
+GO
+
 CREATE PROCEDURE VerJuego
 @id int
 AS
@@ -230,6 +267,13 @@ END;
 GO
 
 --personaje
+CREATE PROCEDURE VerPersonajeSinID
+AS
+BEGIN
+    SELECT * FROM Personaje
+END
+GO
+
 CREATE PROCEDURE VerPersonaje
 @id int
 AS

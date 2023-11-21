@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Data.SqlClient;
 using ApiFinal.Models;
+using Dapper;
 
 
 namespace ApiFinal.Controllers
@@ -11,126 +12,74 @@ namespace ApiFinal.Controllers
     [ApiController]
     public class CompañiaController : ControllerBase
     {
-        public readonly JuegosDbContext _dbcontext;
+        private IConfiguration _Config;
 
-        public CompañiaController(JuegosDbContext dbcontext)
+        public CompañiaController(IConfiguration config)
         {
-            _dbcontext = dbcontext;
+            _Config = config;
         }
 
         [HttpGet]
-        [Route("Lista")]
-        public IActionResult Lista()
+        [Route("list")]
+        public async Task<ActionResult<List<Compañia>>> GetCompañia()
         {
-            List<Compañia> lista = new List<Compañia>();
-
-            try
-            {
-                lista = _dbcontext.Compañias.ToList();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = lista });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = lista });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var oCompañia = conexion.Query<Compañia>("VerCompañiaSinID", commandType: System.Data.CommandType.StoredProcedure);
+            return Ok(oCompañia);
         }
 
         [HttpGet]
-        [Route("Obtener/{id:int}")]
-        public IActionResult Obtner(int id)
+        [Route("obtener/{compañiaId:int}")]
+        public async Task<ActionResult<List<Compañia>>> GetCompañiaId(int CompañiaId)
         {
-            Compañia oCompañia = _dbcontext.Compañias.Find(id);
-
-            if (oCompañia == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                oCompañia = _dbcontext.Compañias.Where(p => p.Id == id).FirstOrDefault();
-                //25 para incluir otra tabla
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = oCompañia });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = oCompañia});
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", CompañiaId);
+            var oCompañia = conexion.Query<Compañia>("VerCompañia", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oCompañia);
         }
 
         [HttpPost]
-        [Route("Guardar")]
-
-        public IActionResult Guardar([FromBody] Compañia objeto)
+        [Route("guardar")]
+        public async Task<ActionResult<List<Compañia>>> InsertCompañia(Compañia com)
         {
-
-            try
-            {
-                _dbcontext.Compañias.Add(objeto);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message });
-            }
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@nombre", com.Nombre);
+            var oCompañia = conexion.Query<Compañia>("AgegarCompañia", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oCompañia);
         }
 
         [HttpPut]
-        [Route("Editar")]
-
-        public IActionResult Editar([FromBody] Compañia objeto)
+        [Route("editar")]
+        public async Task<ActionResult<List<Compañia>>> ActCompañia(Compañia com)
         {
-
-            Compañia oCompañia = _dbcontext.Compañias.Find(objeto.Id);
-
-            if (oCompañia == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                oCompañia.Nombre = objeto.Nombre is null ? oCompañia.Nombre : objeto.Nombre;
-  
-                _dbcontext.Compañias.Update(oCompañia);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message });
-            }
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", com.Id);
+            param.Add("@nombre", com.Nombre);
+            var oCompañia = conexion.Query<Compañia>("ActualizarCompañia", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oCompañia);
         }
 
         [HttpDelete]
-        [Route("Eliminar/{id:int}")]
-        public IActionResult Eliminar(int id)
+        [Route("borrar/{CompañiaId:int}")]
+        public async Task<ActionResult<List<Compañia>>> DelCompañia(int CompañiaId)
         {
-            Compañia oCompañia = _dbcontext.Compañias.Find(id);
-
-            if (oCompañia == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                _dbcontext.Compañias.Remove(oCompañia);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mesaje = ex.Message });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", CompañiaId);
+            var oCompañia = conexion.Query<Compañia>("EliminarCompañia", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oCompañia);
         }
 
     }

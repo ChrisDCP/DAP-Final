@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Data.SqlClient;
 using ApiFinal.Models;
+using Dapper;
 
 
 namespace ApiFinal.Controllers
@@ -10,129 +11,78 @@ namespace ApiFinal.Controllers
     [ApiController]
     public class PersonajeController : ControllerBase
     {
-        public readonly JuegosDbContext _dbcontext;
+        private IConfiguration _Config;
 
-        public PersonajeController(JuegosDbContext dbcontext)
+        public PersonajeController(IConfiguration config)
         {
-            _dbcontext = dbcontext;
+            _Config = config;
         }
 
         [HttpGet]
-        [Route("Lista")]
-        public IActionResult Lista()
+        [Route("lista")]
+        public async Task<ActionResult<List<Personaje>>> GetPersonaje()
         {
-            List<Personaje> lista = new List<Personaje>();
-
-            try
-            {
-                lista = _dbcontext.Personajes.ToList();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = lista });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = lista });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var oPersonaje = conexion.Query<Personaje>("VerPersonajeSinId", commandType: System.Data.CommandType.StoredProcedure);
+            return Ok(oPersonaje);
         }
 
         [HttpGet]
-        [Route("Obtener/{id:int}")]
-        public IActionResult Obtner(int id)
+        [Route("obtener/{PersonajeId:int}")]
+        public async Task<ActionResult<List<Personaje>>> GetPersonajeId(int PersonajeId)
         {
-            Personaje oPersonaje = _dbcontext.Personajes.Find(id);
-
-            if (oPersonaje == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                oPersonaje = _dbcontext.Personajes.Where(p => p.Id == id).FirstOrDefault();
-                //25 para incluir otra tabla
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = oPersonaje });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = oPersonaje });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", PersonajeId);
+            var oPersonaje = conexion.Query<Personaje>("VerPersonaje", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oPersonaje);
         }
 
         [HttpPost]
-        [Route("Guardar")]
-
-        public IActionResult Guardar([FromBody] Personaje objeto)
+        [Route("guardar")]
+        public async Task<ActionResult<List<Juego>>> InsertPersonaje(Personaje per)
         {
-
-            try
-            {
-                _dbcontext.Personajes.Add(objeto);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message });
-            }
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@nombre", per.Nombre);
+            param.Add("@descripcion", per.Descripcion);
+            param.Add("@juegoId", per.JuegoId);
+            var oPersonaje = conexion.Query<Juego>("AgregarPersonaje", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oPersonaje);
         }
 
         [HttpPut]
-        [Route("Editar")]
-
-        public IActionResult Editar([FromBody] Personaje objeto)
+        [Route("actualizar")]
+        public async Task<ActionResult<List<Juego>>> ActPersonaje(Personaje per)
         {
-
-            Personaje oPersonaje = _dbcontext.Personajes.Find(objeto.Id);
-
-            if (oPersonaje == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                oPersonaje.Nombre = objeto.Nombre is null ? oPersonaje.Nombre : objeto.Nombre;
-                oPersonaje.Descripcion = objeto.Descripcion is null ? oPersonaje.Descripcion : objeto.Descripcion;
-                oPersonaje.JuegoId = objeto.JuegoId is null ? oPersonaje.JuegoId : objeto.JuegoId;
-
-
-                _dbcontext.Personajes.Update(oPersonaje);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message });
-            }
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", per.Id);
+            param.Add("@nombre", per.Nombre);
+            param.Add("@descripcion", per.Descripcion);
+            param.Add("@juegoId", per.JuegoId);
+            var oPersonaje = conexion.Query<Personaje>("ActualizarPersonaje", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oPersonaje);
         }
 
         [HttpDelete]
-        [Route("Eliminar/{id:int}")]
-        public IActionResult Eliminar(int id)
+        [Route("borrar/{PersonajeId:int}")]
+        public async Task<ActionResult<List<Personaje>>> DelPersonaje(int PersonajeId)
         {
-            Personaje oPersonaje = _dbcontext.Personajes.Find(id);
-
-            if (oPersonaje == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                _dbcontext.Personajes.Remove(oPersonaje);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mesaje = ex.Message });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", PersonajeId);
+            var oPersonaje = conexion.Query<Juego>("BorrarPersonaje", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oPersonaje);
         }
 
     }

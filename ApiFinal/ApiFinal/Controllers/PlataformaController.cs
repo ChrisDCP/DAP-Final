@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Dapper;
 using ApiFinal.Models;
-
+using System.Data.SqlClient;
+using System;
 
 namespace ApiFinal.Controllers
 {
@@ -10,126 +11,73 @@ namespace ApiFinal.Controllers
     [ApiController]
     public class PlataformaController : ControllerBase
     {
-        public readonly JuegosDbContext _dbcontext;
+        private IConfiguration _Config;
 
-        public PlataformaController(JuegosDbContext dbcontext)
+        public PlataformaController(IConfiguration config)
         {
-            _dbcontext = dbcontext;
+            _Config = config;
         }
 
         [HttpGet]
-        [Route("Lista")]
-        public IActionResult Lista()
+        public async Task<ActionResult<List<Plataforma>>> GetPlataforma()
         {
-            List<Plataforma> lista = new List<Plataforma>();
-
-            try
-            {
-                lista = _dbcontext.Plataformas.ToList();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = lista });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = lista });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var oPlatafroma = conexion.Query<Plataforma>("VerPlataformaSinId", commandType: System.Data.CommandType.StoredProcedure);
+            return Ok(oPlatafroma);
         }
 
         [HttpGet]
-        [Route("Obtener/{id:int}")]
-        public IActionResult Obtner(int id)
+        [Route("obtener/{PlataformaId:int}")]
+        public async Task<ActionResult<List<Plataforma>>> GetPlataformaId(int PlataformaId)
         {
-            Plataforma oPlataforma = _dbcontext.Plataformas.Find(id);
-
-            if (oPlataforma == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                oPlataforma = _dbcontext.Plataformas.Where(p => p.Id == id).FirstOrDefault();
-                //25 para incluir otra tabla
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = oPlataforma });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = oPlataforma });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", PlataformaId);
+            var oPlatafroma = conexion.Query<Plataforma>("VerPlataforma", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oPlatafroma);
         }
 
         [HttpPost]
-        [Route("Guardar")]
-        public IActionResult Guardar([FromBody] Plataforma objeto)
+        [Route("guardar")]
+        public async Task<ActionResult<List<Plataforma>>> InsertPlataforma(Plataforma plat)
         {
-
-            try
-            {
-                _dbcontext.Plataformas.Add(objeto);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message });
-            }
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@nombre", plat.Nombre);
+            var oPlataforma = conexion.Query<Plataforma>("AgregarPlataforma", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oPlataforma);
         }
 
         [HttpPut]
-        [Route("Editar")]
-
-        public IActionResult Editar([FromBody] Plataforma objeto)
+        [Route("actualizar")]
+        public async Task<ActionResult<List<Plataforma>>> ActPlataforma(Plataforma plat)
         {
-
-            Plataforma oPlataforma = _dbcontext.Plataformas.Find(objeto.Id);
-
-            if (oPlataforma == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                oPlataforma.Nombre = objeto.Nombre is null ? oPlataforma.Nombre : objeto.Nombre;
-
-                _dbcontext.Plataformas.Update(oPlataforma);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message });
-            }
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", plat.Id);
+            param.Add("@nombre", plat.Nombre);
+            var oPlataforma = conexion.Query<Plataforma>("ActualizarPlataforma", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oPlataforma);
         }
 
         [HttpDelete]
-        [Route("Eliminar/{id:int}")]
-        public IActionResult Eliminar(int id)
+        [Route("eliminar/{PlataformaId:int}")]
+        public async Task<ActionResult<List<Plataforma>>> DelPlataforma(int PlataformaId)
         {
-            Plataforma oPlataforma = _dbcontext.Plataformas.Find(id);
-
-            if (oPlataforma == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                _dbcontext.Plataformas.Remove(oPlataforma);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mesaje = ex.Message });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", PlataformaId);
+            var oPlataforma = conexion.Query<Plataforma>("BorraPlataforma", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oPlataforma);
         }
-
     }
 }

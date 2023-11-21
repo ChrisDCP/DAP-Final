@@ -1,134 +1,85 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Dapper;
 using ApiFinal.Models;
-
+using System.Data.SqlClient;
 
 namespace ApiFinal.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
-    public class UsuarioControler : ControllerBase
+    public class UsuarioController : ControllerBase
     {
-        public readonly JuegosDbContext _dbcontext;
+        private IConfiguration _Config;
 
-        public UsuarioControler(JuegosDbContext dbcontext)
+        public UsuarioController(IConfiguration config)
         {
-            _dbcontext = dbcontext;
+            _Config = config;
         }
 
         [HttpGet]
-        [Route("Lista")]
-        public IActionResult Lista() { 
-            List<Usuario> lista = new List<Usuario>();
-
-            try
-            {
-                lista = _dbcontext.Usuarios.ToList();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response = lista });
-            }catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = lista });
-            }
-        
+        [Route("lista")]
+        public async Task<ActionResult<List<Usuario>>> GetUsuario()
+        {
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var oUsuario = conexion.Query<Usuario>("VerUsuariosSinID", commandType: System.Data.CommandType.StoredProcedure);
+            return Ok(oUsuario);
         }
 
         [HttpGet]
-        [Route("Obtener/{id:int}")]
-        public IActionResult Obtner(int id)
+        [Route("obtener/{UsuarioId:int}")]
+        public async Task<ActionResult<List<Usuario>>> GetUsuarioId(int UsuarioId)
         {
-            Usuario oUsuario = _dbcontext.Usuarios.Find(id);
-
-            if (oUsuario == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                oUsuario = _dbcontext.Usuarios.Where(p => p.Id == id).FirstOrDefault();
-                //25 para incluir otra tabla
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok", Response =oUsuario });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = ex.Message, Response = oUsuario });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", UsuarioId);
+            var oUsuario = conexion.Query<Usuario>("VerUsuarios", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oUsuario);
         }
 
         [HttpPost]
-        [Route("Guardar")]
-
-        public IActionResult Guardar([FromBody] Usuario objeto) {
-
-            try
-            {
-                _dbcontext.Usuarios.Add(objeto);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message});
-            }
+        [Route("guardar")]
+        public async Task<ActionResult<List<Usuario>>> InsertUsuario(Usuario user)
+        {
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@nombreUsuario", user.NombreUsuario);
+            param.Add("@correElectronico", user.CorreoElectronico);
+            param.Add("@contraseña", user.Contraseña);
+            var oUsuario = conexion.Query<Usuario>("AgregarUsuario", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oUsuario);
         }
 
         [HttpPut]
-        [Route("Editar")]
-
-        public IActionResult Editar([FromBody] Usuario objeto)
+        [Route("actualizar")]
+        public async Task<ActionResult<List<Usuario>>> ActUsuario(Usuario user)
         {
-
-            Usuario oUsuario = _dbcontext.Usuarios.Find(objeto.Id);
-
-            if (oUsuario == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                oUsuario.NombreUsuario = objeto.NombreUsuario is null ? oUsuario.NombreUsuario : objeto.NombreUsuario;
-                oUsuario.CorreoElectronico = objeto.CorreoElectronico is null ? oUsuario.CorreoElectronico : objeto.CorreoElectronico;
-                oUsuario.Contraseña = objeto.Contraseña is null ? oUsuario.Contraseña : objeto.Contraseña;
-
-                _dbcontext.Usuarios.Update(oUsuario);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new { ex.Message });
-            }
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", user.Id);
+            param.Add("@nombre", user.NombreUsuario);
+            var oUsuario = conexion.Query<Usuario>("ActualizarUsuario", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oUsuario);
         }
 
         [HttpDelete]
-        [Route("Eliminar/{id:int}")]
-        public IActionResult Eliminar(int id)
+        [Route("eliminar/{UsuarioId:int}")]
+        public async Task<ActionResult<List<Usuario>>> DelUsuario(int UsuarioId)
         {
-            Usuario oUsuario = _dbcontext.Usuarios.Find(id);
-
-            if (oUsuario == null)
-            {
-                return BadRequest("Producto no encontrado");
-            }
-
-            try
-            {
-                _dbcontext.Usuarios.Remove(oUsuario);
-                _dbcontext.SaveChanges();
-
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "ok" });
-            }catch(Exception ex)
-            {
-                return StatusCode(StatusCodes.Status200OK, new {mesaje = ex.Message });
-            }
-
+            using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));
+            conexion.Open();
+            var param = new DynamicParameters();
+            param.Add("@id", UsuarioId);
+            var oUsuario = conexion.Query<Usuario>("BorrarUsuario", param, commandType: System.Data.CommandType.StoredProcedure)
+            .SingleOrDefault();
+            return Ok(oUsuario);
         }
-
     }
 }
