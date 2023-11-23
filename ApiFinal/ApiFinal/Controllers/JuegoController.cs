@@ -75,7 +75,7 @@ namespace ApiFinal.Controllers
         }
 
         [HttpDelete]
-        [Route("borrar/{compañiaId:int}")]
+        [Route("borrar/{JuegoId:int}")]
         public async Task<ActionResult<List<Juego>>> DelJuego(int JuegoId)
         {
             using var conexion = new SqlConnection(_Config.GetConnectionString("MyDB"));

@@ -48,7 +48,7 @@ namespace ApiFinal.Controllers
             conexion.Open();
             var param = new DynamicParameters();
             param.Add("@nombreUsuario", user.NombreUsuario);
-            param.Add("@correElectronico", user.CorreoElectronico);
+            param.Add("@correoElectronico", user.CorreoElectronico);
             param.Add("@contraseña", user.Contraseña);
             var oUsuario = conexion.Query<Usuario>("AgregarUsuario", param, commandType: System.Data.CommandType.StoredProcedure)
             .SingleOrDefault();
