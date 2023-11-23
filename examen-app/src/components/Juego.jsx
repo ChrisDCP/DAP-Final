@@ -23,6 +23,24 @@ const Juego = () => {
     setJuegos(respuesta.data);
   }
 
+  const [data, setData] = useState([]);
+  console.log(data);
+  useEffect(() => {
+      const fetchData = async () => {
+          
+        await axios.get('http://localhost:5101/api/Juego/list')
+          .then(res => {
+            setData(res.data);
+            console.log(data);
+           // setInfo(res.data.info);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      };
+      fetchData();
+    }, []);
+
   return(
     <div className='App'>
       <div clasName= 'container-fluid'>
